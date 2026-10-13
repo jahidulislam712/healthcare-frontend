@@ -23,5 +23,6 @@ export interface ApiRequestOptions {
 export interface ApiErrorBody {
   success?: boolean;
   message?: string;
+  code?: string;
   errors?: unknown;
 }

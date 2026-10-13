@@ -8,17 +8,15 @@ import axios, {
 } from "axios";
 
 /* -------------------------------------------------------------------------- */
-/* Configuration                                                              */
+/* Configuration & Instance Setup                                             */
 /* -------------------------------------------------------------------------- */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const DEFAULT_TIMEOUT = 30_000;
 
-if (!API_BASE_URL) {
-  throw new Error(
-    "NEXT_PUBLIC_API_BASE_URL is not defined in environment variables.",
-  );
+if (!API_BASE_URL && typeof window === "undefined") {
+  console.warn("WARNING: NEXT_PUBLIC_API_BASE_URL is not defined in environment variables.");
 }
 
 const axiosInstance: AxiosInstance = axios.create({
@@ -26,14 +24,18 @@ const axiosInstance: AxiosInstance = axios.create({
   timeout: DEFAULT_TIMEOUT,
   headers: {
     Accept: "application/json",
+    "Content-Type": "application/json",
   },
 });
 
+/* -------------------------------------------------------------------------- */
+/* Production-Grade Serializable Custom Error                                 */
+/* -------------------------------------------------------------------------- */
 
 export class ApiClientError extends Error {
-  readonly status: number | undefined;
-  readonly code: string | undefined;
-  readonly errors: unknown;
+  readonly status?: number;
+  readonly code?: string;
+  readonly errors?: unknown;
   readonly isNetworkError: boolean;
   readonly isTimeout: boolean;
 
@@ -56,12 +58,29 @@ export class ApiClientError extends Error {
     this.isNetworkError = options.isNetworkError ?? false;
     this.isTimeout = options.isTimeout ?? false;
 
+    // Maintains proper prototype chain for instanceof checks
     Object.setPrototypeOf(this, new.target.prototype);
+  }
+
+  /**
+   * Serializes the error into a plain object. 
+   * Crucial for preventing Next.js boundary crashes when errors are serialized.
+   */
+  toJSON() {
+    return {
+      name: this.name,
+      message: this.message,
+      status: this.status,
+      code: this.code,
+      errors: this.errors,
+      isNetworkError: this.isNetworkError,
+      isTimeout: this.isTimeout,
+    };
   }
 }
 
 /* -------------------------------------------------------------------------- */
-/* Error normalization                                                        */
+/* Error Normalization                                                        */
 /* -------------------------------------------------------------------------- */
 
 function normalizeError(error: unknown): ApiClientError {
@@ -78,8 +97,8 @@ function normalizeError(error: unknown): ApiClientError {
   const isTimeout =
     axiosError.code === "ECONNABORTED" || axiosError.code === "ETIMEDOUT";
 
-  const isNetworkError =
-    !axiosError.response && !axiosError.request ? false : !axiosError.response;
+  // A network error occurs if there is no response and the request was actually sent
+  const isNetworkError = !axiosError.response && Boolean(axiosError.request);
 
   let message: string;
 
@@ -90,14 +109,14 @@ function normalizeError(error: unknown): ApiClientError {
   } else if (responseData?.message) {
     message = responseData.message;
   } else if (isNetworkError) {
-    message = "Unable to connect to the server.";
+    message = "Unable to connect to the server. Please check your internet connection.";
   } else {
     message = axiosError.message || "The request failed.";
   }
 
   return new ApiClientError(message, {
     status,
-    code: axiosError.code,
+    code: responseData?.code ?? axiosError.code,
     errors: responseData?.errors,
     isNetworkError,
     isTimeout,
@@ -105,7 +124,7 @@ function normalizeError(error: unknown): ApiClientError {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Core request                                                               */
+/* Core Request Wrapper                                                       */
 /* -------------------------------------------------------------------------- */
 
 async function request<TData>(
@@ -128,6 +147,9 @@ async function request<TData>(
     const response: AxiosResponse<ApiResponse<TData>> =
       await axiosInstance.request<ApiResponse<TData>>(config);
 
+    // CRITICAL: Return ONLY response.data. Returning the raw AxiosResponse 
+    // object introduces class instances and circular references that break Next.js 
+    // Server-to-Client boundaries.
     return response.data;
   } catch (error: unknown) {
     throw normalizeError(error);
@@ -135,7 +157,7 @@ async function request<TData>(
 }
 
 /* -------------------------------------------------------------------------- */
-/* HTTP methods                                                               */
+/* HTTP Methods Export                                                        */
 /* -------------------------------------------------------------------------- */
 
 function get<TData>(
@@ -175,10 +197,6 @@ function deleteRequest<TData>(
 ): Promise<ApiResponse<TData>> {
   return request<TData>("DELETE", endpoint, undefined, options);
 }
-
-/* -------------------------------------------------------------------------- */
-/* Public client                                                              */
-/* -------------------------------------------------------------------------- */
 
 export const httpClient = {
   get,

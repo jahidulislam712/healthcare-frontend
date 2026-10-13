@@ -1,8 +1,36 @@
+import {
+  dehydrate,
+  HydrationBoundary,
+  noop,
+  QueryClient,
+} from "@tanstack/react-query";
+import { getDoctors } from "./_action";
+import DoctorList from "@/components/modules/Consultation/DoctorList";
+import { Suspense } from "react";
 
-function ConsultationPage() {
+const DoctorsWithPrefetchData = async () => {
+  const queryClient = new QueryClient();
+
+  await queryClient
+    .query({
+      queryKey: ["doctors"],
+      queryFn: getDoctors,
+    })
+    .catch(noop);
+
   return (
-    <div>ConsultationPage</div>
-  )
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <DoctorList />
+    </HydrationBoundary>
+  );
+};
+
+async function consultationPage() {
+  return (
+    <Suspense fallback={'loading doctors...'}>
+      <DoctorsWithPrefetchData/>
+    </Suspense>
+  );
 }
 
-export default ConsultationPage
+export default consultationPage;
