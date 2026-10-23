@@ -35,7 +35,7 @@ export function LoginForm({
       password: "",
     },
     validators: {
-      onBlur: loginZodSchema,
+      // onChange: loginZodSchema,
       onSubmit: loginZodSchema,
     },
     onSubmit: async ({ value }) => {
@@ -93,6 +93,7 @@ export function LoginForm({
               name={field.name}
               value={field.state.value}
               placeholder="Enter your password"
+              autoComplete="current-password"
               type="password"
               onBlue={field.handleBlur}
               onChange={field.handleChange}

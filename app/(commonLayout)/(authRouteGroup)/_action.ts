@@ -1,4 +1,5 @@
 "use server";
+
 import { ApiResponse } from "@/app/types/api.types";
 import { ILoginResponse } from "@/app/types/auth.types";
 import {
@@ -9,8 +10,54 @@ import {
   loginZodSchema,
 } from "@/app/zod/auth.validation";
 import { ApiClientError, httpClient } from "@/lib/axios/httpClient";
-import { setTokenInCookies } from "@/lib/tokenUtils";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+const AUTH_COOKIE_NAMES = new Set([
+  "accessToken",
+  "refreshToken",
+  "better-auth.session_token",
+]);
+
+async function copyAuthCookies(setCookieHeaders: string[]) {
+  if (setCookieHeaders.length === 0) {
+    throw new Error("Login response did not include authentication cookies.");
+  }
+
+  const receivedNames = new Set<string>();
+  const cookieStore = await cookies();
+
+  for (const header of setCookieHeaders) {
+    const cookiePair = header.split(";", 1)[0];
+    const separator = cookiePair.indexOf("=");
+
+    if (separator < 1) continue;
+
+    const name = cookiePair.slice(0, separator);
+    const value = cookiePair.slice(separator + 1);
+
+    if (!AUTH_COOKIE_NAMES.has(name) || !value) continue;
+
+    const maxAgeMatch = header.match(/;\s*max-age=(\d+)/i);
+    const maxAge = maxAgeMatch ? Number(maxAgeMatch[1]) : undefined;
+
+    cookieStore.set(name, value, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      ...(maxAge !== undefined ? { maxAge } : {}),
+    });
+
+    receivedNames.add(name);
+  }
+
+  for (const name of AUTH_COOKIE_NAMES) {
+    if (!receivedNames.has(name)) {
+      throw new Error(`Login response did not include the ${name} cookie.`);
+    }
+  }
+}
 
 export const loginAction = async (
   payload: ILoginPayload,
@@ -26,25 +73,36 @@ export const loginAction = async (
   }
 
   try {
-    const response = await httpClient.post<ILoginResponse>(
+    // const response = await fetch(new URL("auth/login", formattedBaseUrl), {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify(parsedPayload.data),
+    //   cache: "no-store",
+    // });
+
+    const response = await httpClient.postWithHeaders(
       "/auth/login",
       parsedPayload.data,
     );
 
-    if (response.success && response.data) {
-      const { accessToken, refreshToken, token } = response.data;
+    // console.log(response, "proxy res");
+    // const result = (await response.json()) as ApiResponse<ILoginResponse>;
 
-      await setTokenInCookies("accessToken", accessToken);
-      await setTokenInCookies("refreshToken", refreshToken);
-      await setTokenInCookies("better-auth.session_token", token);
-
-      redirect("/dashboard");
+    if (!response.data.success || !response.data.data) {
+      return {
+        success: false,
+        message: response.data.message ?? "Unable to login. Please try again.",
+      };
     }
 
-    return {
-      success: false,
-      message: "Login failed: No response data received.",
-    };
+    const setCookieHeaders = response.headers["set-cookie"];
+
+    if (!Array.isArray(setCookieHeaders)) {
+      throw new Error("Login response did not include authentication cookies.");
+    }
+
+    await copyAuthCookies(setCookieHeaders);
+    redirect("/dashboard");
   } catch (error: unknown) {
     if (
       error &&
@@ -169,4 +227,42 @@ export const resetPasswordAction = async (
       message: "Unable to reset your password. Please try again.",
     };
   }
+};
+
+/**
+ * Reset Password Action
+ */
+export const logoutAction = async () => {
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore
+    .getAll()
+    .map(({ name, value }) => `${name}=${value}`)
+    .join(";");
+
+  try {
+    await httpClient.post("/auth/logout", undefined, {
+      headers: { Cookie: cookieHeader },
+    });
+  } finally {
+    for (const name of [
+      "accessToken",
+      "refreshToken",
+      "better-auth.session_token",
+    ]) {
+      cookieStore.set(name, "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 0,
+      });
+    }
+
+    redirect("/login");
+  }
+
+  return {
+    success: true,
+    message: "Logged out successfully",
+  };
 };

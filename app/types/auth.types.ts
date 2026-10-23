@@ -1,7 +1,6 @@
+export type UserRole = "SUPER_ADMIN" | "ADMIN" | "DOCTOR" | "PATIENT"
+
 export interface ILoginResponse {
-  token: string;
-  accessToken: string;
-  refreshToken: string;
   user: {
     needPasswordChange: boolean;
     email: string;
@@ -12,4 +11,15 @@ export interface ILoginResponse {
     isDeleted: boolean;
     emailVerified: boolean;
   };
+}
+
+export interface UserInfo{
+  id: string;
+  name: string;
+  email: string;
+  image?: string;
+  role: UserRole;
+  doctor?: unknown;
+  patient?: unknown;
+  admin?: unknown;
 }

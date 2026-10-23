@@ -12,11 +12,11 @@ function DoctorList() {
   const doctors = data?.data ?? [];
   return (
     <div>
-      {doctors.map((doctor) => (
+      {/* {doctors.map((doctor) => (
         <div key={doctor.id}>
           <h2>{doctor.name}</h2>
         </div>
-      ))}
+      ))} */}
     </div>
   );
 }

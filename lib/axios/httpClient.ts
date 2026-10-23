@@ -1,4 +1,8 @@
-import { ApiErrorBody, ApiRequestOptions, ApiResponse } from "@/app/types/api.types";
+import {
+  ApiErrorBody,
+  ApiRequestOptions,
+  ApiResponse,
+} from "@/app/types/api.types";
 import axios, {
   AxiosError,
   type AxiosInstance,
@@ -16,7 +20,9 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const DEFAULT_TIMEOUT = 30_000;
 
 if (!API_BASE_URL && typeof window === "undefined") {
-  console.warn("WARNING: NEXT_PUBLIC_API_BASE_URL is not defined in environment variables.");
+  console.warn(
+    "WARNING: NEXT_PUBLIC_API_BASE_URL is not defined in environment variables.",
+  );
 }
 
 const axiosInstance: AxiosInstance = axios.create({
@@ -63,7 +69,7 @@ export class ApiClientError extends Error {
   }
 
   /**
-   * Serializes the error into a plain object. 
+   * Serializes the error into a plain object.
    * Crucial for preventing Next.js boundary crashes when errors are serialized.
    */
   toJSON() {
@@ -109,7 +115,8 @@ function normalizeError(error: unknown): ApiClientError {
   } else if (responseData?.message) {
     message = responseData.message;
   } else if (isNetworkError) {
-    message = "Unable to connect to the server. Please check your internet connection.";
+    message =
+      "Unable to connect to the server. Please check your internet connection.";
   } else {
     message = axiosError.message || "The request failed.";
   }
@@ -147,8 +154,8 @@ async function request<TData>(
     const response: AxiosResponse<ApiResponse<TData>> =
       await axiosInstance.request<ApiResponse<TData>>(config);
 
-    // CRITICAL: Return ONLY response.data. Returning the raw AxiosResponse 
-    // object introduces class instances and circular references that break Next.js 
+    // CRITICAL: Return ONLY response.data. Returning the raw AxiosResponse
+    // object introduces class instances and circular references that break Next.js
     // Server-to-Client boundaries.
     return response.data;
   } catch (error: unknown) {
@@ -198,10 +205,51 @@ function deleteRequest<TData>(
   return request<TData>("DELETE", endpoint, undefined, options);
 }
 
+// AI generated code that returns the headers also with body
+async function requestWithHeaders<TData>(
+  method: Method,
+  endpoint: string,
+  data?: unknown,
+  options: ApiRequestOptions = {},
+): Promise<{
+  data: ApiResponse<TData>;
+  headers: AxiosResponse["headers"];
+}> {
+  const config: AxiosRequestConfig = {
+    method,
+    url: endpoint,
+    params: options.params,
+    headers: options.headers,
+    signal: options.signal,
+    timeout: options.timeout ?? DEFAULT_TIMEOUT,
+    ...(data !== undefined ? { data } : {}),
+  };
+
+  try {
+    const response = await axiosInstance.request<ApiResponse<TData>>(config);
+
+    return {
+      data: response.data,
+      headers: response.headers,
+    };
+  } catch (error: unknown) {
+    throw normalizeError(error);
+  }
+}
+
+function postWithHeaders<TData>(
+  endpoint: string,
+  data?: unknown,
+  options?: ApiRequestOptions,
+) {
+  return requestWithHeaders<TData>("POST", endpoint, data, options);
+}
+
 export const httpClient = {
   get,
   post,
   put,
   patch,
   delete: deleteRequest,
+  postWithHeaders,
 } as const;
