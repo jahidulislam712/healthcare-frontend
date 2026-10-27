@@ -1,9 +1,12 @@
-import React from 'react'
+import DoctorsManagementContent from "@/components/modules/Admin/DoctorsManagement/DoctorsManagementContent";
+import { Suspense } from "react";
 
-function DoctorsManagementPage() {
+async function DoctorsManagementPage() {
   return (
-    <div>DoctorsManagementPage</div>
-  )
+    <Suspense fallback="Doctor management content loading...">
+      <DoctorsManagementContent />
+    </Suspense>
+  );
 }
 
-export default DoctorsManagementPage
+export default DoctorsManagementPage;

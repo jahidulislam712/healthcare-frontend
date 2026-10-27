@@ -1,38 +1,42 @@
 import { UserRole } from "@/app/types/auth.types";
 import { NavSection } from "@/app/types/dashboard.types";
+import { getDefaultDashboarRoute } from "./userUtils";
 
-export const commonNavItems: NavSection[] = [
-  {
-    title: "Dashboard",
-    items: [
-      {
-        title: "Home",
-        href: "/",
-        icon: "Home",
-      },
-      {
-        title: "Dashboard",
-        href: "/dashboard",
-        icon: "LayoutDashboard",
-      },
-      {
-        title: "My Profile",
-        href: "/my-profile",
-        icon: "User",
-      },
-    ],
-  },
-  {
-    title: "Settings",
-    items: [
-      {
-        title: "Change Password",
-        href: "change-password",
-        icon: "Settings",
-      },
-    ],
-  },
-];
+export const getCommonNavItems = (role: UserRole) : NavSection[] => {
+  const dashboardUrl = getDefaultDashboarRoute(role)
+  return [
+    {
+      title: "Dashboard",
+      items: [
+        {
+          title: "Home",
+          href: "/",
+          icon: "Home",
+        },
+        {
+          title: "Dashboard",
+          href: dashboardUrl,
+          icon: "LayoutDashboard",
+        },
+        {
+          title: "My Profile",
+          href: "/my-profile",
+          icon: "User",
+        },
+      ],
+    },
+    {
+      title: "Settings",
+      items: [
+        {
+          title: "Change Password",
+          href: "change-password",
+          icon: "Settings",
+        },
+      ],
+    },
+  ];
+};
 
 export const doctorNavItems: NavSection[] = [
   {
@@ -164,6 +168,9 @@ export const patientNavItems: NavSection[] = [
 ];
 
 export const getNavMenusByRole = (role: UserRole): NavSection[] => {
+
+  const commonNavItems = getCommonNavItems(role)
+
   switch (role) {
     case "ADMIN":
     case "SUPER_ADMIN":
