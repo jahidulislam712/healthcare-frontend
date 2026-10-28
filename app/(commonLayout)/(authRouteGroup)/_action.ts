@@ -1,7 +1,7 @@
 "use server";
 
 import { ApiResponse } from "@/app/types/api.types";
-import { ILoginResponse } from "@/app/types/auth.types";
+import { ILoginResponse, UserRole } from "@/app/types/auth.types";
 import {
   IForgetPasswordPayload,
   ILoginPayload,
@@ -10,6 +10,7 @@ import {
   loginZodSchema,
 } from "@/app/zod/auth.validation";
 import { ApiClientError, httpClient } from "@/lib/axios/httpClient";
+import { getDefaultDashboarRoute } from "@/lib/userUtils";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -102,7 +103,13 @@ export const loginAction = async (
     }
 
     await copyAuthCookies(setCookieHeaders);
-    redirect("/dashboard");
+
+
+    const routeToRedirect = getDefaultDashboarRoute(
+      response.data.data?.user?.role as UserRole,
+    );
+    
+    redirect(routeToRedirect);
   } catch (error: unknown) {
     if (
       error &&

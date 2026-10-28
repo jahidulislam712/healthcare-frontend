@@ -1,9 +1,12 @@
-import React from 'react'
+import SchedulesManagementContent from "@/components/modules/Admin/SchedulesManagement/ScheduleManagementContent";
+import { Suspense } from "react";
 
 function SchedulesManagementPage() {
   return (
-    <div>SchedulesManagementPage</div>
-  )
+    <Suspense fallback="Loading schedules...">
+      <SchedulesManagementContent />
+    </Suspense>
+  );
 }
 
-export default SchedulesManagementPage
+export default SchedulesManagementPage;

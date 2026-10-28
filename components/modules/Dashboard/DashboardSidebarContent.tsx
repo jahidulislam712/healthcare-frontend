@@ -22,17 +22,17 @@ function DashboardSidebarContent({
   const pathname = usePathname();
 
   return (
-    <div>
+    <div className="flex h-full min-h-0 flex-col">
       {/* Logo / Brand */}
-      <div className="flex h-16 items-center border-b px-6">
+      <div className="flex h-16 shrink-0 items-center border-b px-6">
         <Link href={dashboardHome}>
           <span className="text-xl font-bold text-primary">HealthCare</span>
         </Link>
       </div>
 
       {/* Side Navigation */}
-      <ScrollArea className="flex-1 px-3 py-4">
-        <nav className="space-y-6">
+      <ScrollArea className="min-h-0 flex-1 px-3 py-4">
+        <nav className="space-y-4">
           {navItems.map((section, sectionId) => (
             <div key={sectionId}>
               <h4 className="mb-2 px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -66,29 +66,30 @@ function DashboardSidebarContent({
         </nav>
       </ScrollArea>
 
-      {/* User Info At Bottom */}
-      <div className="border-t px-3 py-4">
+      {/* User Info */}
+      <div className="shrink-0 border-t px-3 py-4">
         {user ? (
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full overflow-hidden bg-primary/10 flex items-center justify-center">
-              <span className="text-sm font-semibold text-primary">
-                {user.image ? (
-                  <Image
-                    src={user.image}
-                    alt={user.name}
-                    height={32}
-                    width={32}
-                  />
-                ) : (
-                  user.name.charAt(0).toUpperCase()
-                )}
-              </span>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10">
+              {user.image ? (
+                <Image
+                  src={user.image}
+                  alt={user.name}
+                  height={32}
+                  width={32}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-sm font-semibold text-primary">
+                  {user.name.charAt(0).toUpperCase()}
+                </span>
+              )}
             </div>
 
-            <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-medium truncate">{user.name}</p>
-              <p className="text-xs text-muted-foreground capitalize">
-                {user.role.toLocaleLowerCase().replace("_", " ")}
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{user.name}</p>
+              <p className="truncate text-xs capitalize text-muted-foreground">
+                {user.role.toLowerCase().replaceAll("_", " ")}
               </p>
             </div>
           </div>

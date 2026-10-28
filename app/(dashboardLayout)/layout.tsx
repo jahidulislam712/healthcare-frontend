@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import DashboardNavbar from "@/components/modules/Dashboard/DashboardNavbar";
 import DashboardSidebar from "@/components/modules/Dashboard/DashboardSidebar";
+import { NavbarSkeleton, SidebarSkeleton } from "@/components/modules/Dashboard/SidebarSkeleton";
 
 function RootDashboardLayout({
   children,
@@ -9,26 +10,18 @@ function RootDashboardLayout({
     <div className="flex h-screen overflow-hidden">
       {/* Dashboard Sidebar */}
       <Suspense
-        fallback={
-          <div
-            aria-label="Loading dashboard navigation"
-            className="p-4 text-sm text-muted-foreground"
-            role="status"
-          >
-            Loading navigation...
-          </div>
-        }
+        fallback={<SidebarSkeleton/>}
       >
         <DashboardSidebar />
       </Suspense>
 
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* DashboardNavbar */}
-        <Suspense fallback="Loading Navbar">
+        <Suspense fallback={<NavbarSkeleton/>}>
           <DashboardNavbar />
         </Suspense>
         {/* Dashboard Content */}
-        <main className="flex-1 overflow-y-auto bg-muted/10 p-4 md:p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto bg-muted/10 p-4 md:p-6">
           <div>{children}</div>
         </main>
       </div>

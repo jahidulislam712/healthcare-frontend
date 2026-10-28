@@ -15,7 +15,7 @@ async function DoctorsManagementContent() {
     Awaited<ReturnType<typeof getDoctors>>
   >(["admin-doctor-data"]);
 
-  return <DoctorsTable data={result?.data ?? []} />;
+  return <DoctorsTable doctor={result?.data ?? []} />;
 }
 
 export default DoctorsManagementContent;

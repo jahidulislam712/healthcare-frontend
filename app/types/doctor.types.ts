@@ -24,6 +24,8 @@ export interface IDoctor {
   currentWorkingPlace: string;
   designation: string;
   averageRating: number;
+  experience: number;
+  createdAt: Date;
   user: {
     status: UserStatus;
   };

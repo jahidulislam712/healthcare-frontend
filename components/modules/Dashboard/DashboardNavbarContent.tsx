@@ -18,7 +18,7 @@ function DashboardNavbarContent({
   dashboardHome: string;
 }) {
   return (
-    <div className="flex items-center gap-4 w-full px-4 py-3 border-b bg-background">
+    <div className="flex h-16 w-full shrink-0 items-center gap-4 border-b bg-background px-4">
       {/* mobile menu trigger */}
       <Sheet>
         <SheetTrigger
