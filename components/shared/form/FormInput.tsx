@@ -2,15 +2,16 @@
 
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type FormInputProps = {
   label: string;
   name: string;
-  value: string;
+  value: string | number | string[];
   placeholder?: string;
   type?: React.HTMLInputTypeAttribute;
   autoComplete?: string;
-  onBlue: () => void;
+  onBlur: () => void;
   onChange: (value: string) => void;
   errors: Array<string | { message?: string } | undefined>;
   rightElement?: React.ReactNode;
@@ -22,7 +23,7 @@ function FormInput({
   placeholder,
   type = "text",
   autoComplete,
-  onBlue,
+  onBlur,
   onChange,
   errors,
   rightElement,
@@ -44,18 +45,32 @@ function FormInput({
         <FieldLabel htmlFor={name}>{label}</FieldLabel>
         {rightElement}
       </div>
-      <Input
-        type={type}
-        id={name}
-        name={name}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        value={value}
-        onBlur={onBlue}
-        onChange={(e) => onChange(e.target.value)}
-        aria-invalid={hasErrors}
-        aria-describedby={hasErrors ? errorId : undefined}
-      />
+      {type === "textarea" ? (
+        <Textarea
+          id={name}
+          name={name}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          value={value}
+          onBlur={onBlur}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={hasErrors}
+          aria-describedby={hasErrors ? errorId : undefined}
+        />
+      ) : (
+        <Input
+          type={type}
+          id={name}
+          name={name}
+          autoComplete={autoComplete}
+          placeholder={placeholder}
+          value={value}
+          onBlur={onBlur}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={hasErrors}
+          aria-describedby={hasErrors ? errorId : undefined}
+        />
+      )}
 
       {hasErrors && (
         <div id={errorId} className="text-red-600 text-sm">

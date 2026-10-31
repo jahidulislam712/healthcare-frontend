@@ -32,7 +32,7 @@ export const columns = columnHelper.columns([
           <span className="text-xs text-muted-foreground">No Specialties</span>
         );
       return (
-        <div>
+        <div className="flex flex-wrap gap-x-2 gap-y-1">
           {specialties.map(({ specialty }, id) => {
             const title = specialty.title || "N/A";
             return (

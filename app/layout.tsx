@@ -4,6 +4,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import QueryProviders from "./providers/QueryProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "./providers/ThemeProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -29,6 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={cn(
         "h-full",
         "antialiased",
@@ -39,9 +42,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       )}
     >
       <body className="min-h-full flex flex-col">
-        <QueryProviders>
-          <TooltipProvider>{children}</TooltipProvider>
-        </QueryProviders>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProviders>
+            <TooltipProvider>
+              {children}
+              <Toaster position="top-right" richColors closeButton/>
+            </TooltipProvider>
+          </QueryProviders>
+        </ThemeProvider>
       </body>
     </html>
   );

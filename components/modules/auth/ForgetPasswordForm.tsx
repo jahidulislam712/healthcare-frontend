@@ -98,7 +98,7 @@ export function ForgetPasswordForm({
               placeholder="Enter your email"
               type="email"
               autoComplete="email"
-              onBlue={field.handleBlur}
+              onBlur={field.handleBlur}
               onChange={field.handleChange}
               errors={field.state.meta.isTouched ? field.state.meta.errors : []}
             />

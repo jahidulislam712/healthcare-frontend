@@ -80,7 +80,7 @@ export function LoginForm({
               placeholder="Enter your email"
               type="email"
               autoComplete="email"
-              onBlue={field.handleBlur}
+              onBlur={field.handleBlur}
               onChange={field.handleChange}
               errors={field.state.meta.isTouched ? field.state.meta.errors : []}
             />
@@ -95,7 +95,7 @@ export function LoginForm({
               placeholder="Enter your password"
               autoComplete="current-password"
               type="password"
-              onBlue={field.handleBlur}
+              onBlur={field.handleBlur}
               onChange={field.handleChange}
               errors={field.state.meta.isTouched ? field.state.meta.errors : []}
               rightElement={

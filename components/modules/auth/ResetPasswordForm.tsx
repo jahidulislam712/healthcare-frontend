@@ -123,7 +123,7 @@ export default function ResetPasswordForm({
                   placeholder="Enter the 6-digit code"
                   type="text"
                   autoComplete="one-time-code"
-                  onBlue={field.handleBlur}
+                  onBlur={field.handleBlur}
                   onChange={field.handleChange}
                   errors={
                     field.state.meta.isTouched ? field.state.meta.errors : []
@@ -141,7 +141,7 @@ export default function ResetPasswordForm({
                   placeholder="Enter a new password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
-                  onBlue={field.handleBlur}
+                  onBlur={field.handleBlur}
                   onChange={field.handleChange}
                   errors={
                     field.state.meta.isTouched ? field.state.meta.errors : []

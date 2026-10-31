@@ -7,6 +7,7 @@ import { Menu, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import NotificationDropdown from "./NotificationDropdown";
 import UserDropdown from "./UserDropdown";
+import { ModeToggle } from "@/components/features/ModeToggle";
 
 function DashboardNavbarContent({
   user,
@@ -48,11 +49,13 @@ function DashboardNavbarContent({
 
       {/* Right Side Actions */}
       <div className="flex items-center gap-2">
-          {/* Notification */}
-          <NotificationDropdown/>
+        {/* Dark/Light toggle */}
+        <ModeToggle />
+        {/* Notification */}
+        <NotificationDropdown />
 
-          {/* User Dropdown  */}
-          <UserDropdown user={user}/>
+        {/* User Dropdown  */}
+        <UserDropdown user={user} />
       </div>
     </div>
   );

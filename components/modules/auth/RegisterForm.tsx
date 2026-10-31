@@ -75,7 +75,7 @@ function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
                   placeholder="Enter full name"
                   value={field.state.value}
                   autoComplete="name"
-                  onBlue={field.handleBlur}
+                  onBlur={field.handleBlur}
                   onChange={field.handleChange}
                   errors={
                     field.state.meta.isTouched ? field.state.meta.errors : []
@@ -94,7 +94,7 @@ function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
                   value={field.state.value}
                   type="email"
                   autoComplete="email"
-                  onBlue={field.handleBlur}
+                  onBlur={field.handleBlur}
                   onChange={field.handleChange}
                   errors={
                     field.state.meta.isTouched ? field.state.meta.errors : []
@@ -112,7 +112,7 @@ function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
                   placeholder="Enter password"
                   value={field.state.value}
                   type="password"
-                  onBlue={field.handleBlur}
+                  onBlur={field.handleBlur}
                   onChange={field.handleChange}
                   errors={
                     field.state.meta.isTouched ? field.state.meta.errors : []

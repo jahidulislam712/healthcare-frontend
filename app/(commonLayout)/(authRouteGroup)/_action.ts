@@ -81,7 +81,7 @@ export const loginAction = async (
     //   cache: "no-store",
     // });
 
-    const response = await httpClient.postWithHeaders(
+    const response = await httpClient.postWithHeaders<ILoginResponse>(
       "/auth/login",
       parsedPayload.data,
     );

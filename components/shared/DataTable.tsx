@@ -42,6 +42,7 @@ function DataTable<TData extends RowData>({
   actions,
   emptyMessage = "No Results.",
   isLoading = false,
+  toolbarAction,
 }: DataTableProps<TData>) {
   const columnHelper = createColumnHelper<typeof features, TData>();
 
@@ -83,7 +84,7 @@ function DataTable<TData extends RowData>({
                   )}
 
                   {actions?.onDelete && (
-                    <DropdownMenuItem onClick={() => actions.onDelete?.(item)}>
+                    <DropdownMenuItem onClick={() => actions.onDelete?.(item)} variant="destructive">
                       Delete
                     </DropdownMenuItem>
                   )}
@@ -109,7 +110,7 @@ function DataTable<TData extends RowData>({
   const paginationRows = table.getPrePaginatedRowModel().rows;
 
   return (
-    <div className="p-4">
+    <div>
       <div className="flex items-center justify-between gap-2 mb-4">
         <div className="relative w-full max-w-sm">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -120,9 +121,7 @@ function DataTable<TData extends RowData>({
             className="pl-8"
           />
         </div>
-        <div className="flex gap-2">
-          <Button>Create Doctor</Button>
-        </div>
+        {toolbarAction}
       </div>
       <div className="rounded-md border">
         <Table>
