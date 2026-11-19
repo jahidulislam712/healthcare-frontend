@@ -18,17 +18,20 @@ export default function DoctorsManagementPage() {
 
 async function DoctorsWithData() {
   const queryClient = new QueryClient();
-  await queryClient.query({
-    queryKey: ["admin-doctors-data"],
-    queryFn: getDoctors,
-    staleTime: 60_000,
-  });
 
-  await queryClient.query({
-    queryKey: ["admin-specialties"],
-    queryFn: getSpecialties,
-    staleTime: 60_000,
-  });
+  await Promise.all([
+    queryClient.query({
+      queryKey: ["admin-doctors-data"],
+      queryFn: getDoctors,
+      staleTime: 60_000,
+    }),
+    
+    queryClient.query({
+      queryKey: ["admin-specialties"],
+      queryFn: () => getSpecialties({ limit: 100 }),
+      staleTime: 60_000,
+    }),
+  ]);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

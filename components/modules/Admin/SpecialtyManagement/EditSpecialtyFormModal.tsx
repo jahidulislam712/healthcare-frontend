@@ -21,12 +21,12 @@ import { SpecialtyIconPicker } from "./SpecialtyIconPicker";
 import { editSpecialty } from "@/services/specialty.services";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { useEffect } from "react";
 import { ISpecialty } from "@/app/types/specialty.types";
 
 type EditSpecialtyProps = {
   open: boolean;
-  setOpen: Dispatch<SetStateAction<boolean>>;
+  setOpen: (open: boolean) => void;
   specialty: ISpecialty | null;
 };
 

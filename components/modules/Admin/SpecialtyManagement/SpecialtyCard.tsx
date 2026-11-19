@@ -12,7 +12,6 @@ import Icon from "@/lib/iconMapper";
 import { MoreHorizontal } from "lucide-react";
 
 type SpecialtyCardProps = {
-  key: string;
   data: ISpecialty;
   onDelete: (id: string) => void;
   isDeleting: boolean;
@@ -20,17 +19,14 @@ type SpecialtyCardProps = {
 };
 
 export default function SpecialtyCard({
-  key,
   data: item,
   onDelete,
   isDeleting,
   onEdit,
 }: SpecialtyCardProps) {
+  
   return (
-    <Card
-      key={key}
-      className="group rounded-lg transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm"
-    >
+    <Card className="group rounded-lg transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-sm">
       <CardHeader className="pb-3">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex size-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -79,7 +75,7 @@ export default function SpecialtyCard({
       <CardContent className="pt-0">
         <div className="border-t border-border pt-2">
           <p className="text-sm font-bold">
-            {item.doctorSpecialties?.length ?? 0}
+            {item._count?.doctorSpecialties ?? 0}
           </p>
           <p className="text-[10px] text-muted-foreground">Doctors</p>
         </div>

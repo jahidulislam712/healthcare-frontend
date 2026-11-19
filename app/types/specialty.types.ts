@@ -16,7 +16,7 @@ export interface ISpecialty {
   title: string;
   description?: string;
   icon?: string;
-  doctorSpecialties?: DoctorSpecialties[];
+  _count?: { doctorSpecialties: number };
 }
 
 export interface SpecialtyListResult {

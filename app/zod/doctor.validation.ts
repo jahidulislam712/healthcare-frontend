@@ -181,22 +181,58 @@ export type ICreateDoctorFormValues = z.input<typeof createDoctorFormSchema>;
 export type ICreateDoctorPayload = z.output<typeof createDoctorPayloadSchema>;
 
 export const createDoctorSubmissionSchema = createDoctorFormSchema.transform(
-  (vaules) => ({
-    password: vaules.password,
+  (values) => ({
+    password: values.password,
     doctor: {
-      name: vaules.name,
-      email: vaules.email,
-      profilePhoto: vaules.profilePhoto || undefined,
-      contactNumber: vaules.contactNumber || undefined,
-      address: vaules.address || undefined,
-      registrationNumber: vaules.registrationNumber,
-      experience: vaules.experience,
-      gender: vaules.gender,
-      appointmentFee: vaules.appointmentFee,
-      qualification: vaules.qualification,
-      currentWorkingPlace: vaules.currentWorkingPlace,
-      designation: vaules.designation,
+      name: values.name,
+      email: values.email,
+      profilePhoto: values.profilePhoto || undefined,
+      contactNumber: values.contactNumber || undefined,
+      address: values.address || undefined,
+      registrationNumber: values.registrationNumber,
+      experience: values.experience,
+      gender: values.gender,
+      appointmentFee: values.appointmentFee,
+      qualification: values.qualification,
+      currentWorkingPlace: values.currentWorkingPlace,
+      designation: values.designation,
     },
-    specialties: vaules.specialties
+    specialties: values.specialties,
   }),
 );
+
+export const editDoctorFormSchema = createDoctorFormSchema.omit({
+  email: true,
+  password: true,
+});
+export type IEditDoctorFormValues = z.input<typeof editDoctorFormSchema>;
+export type IEditDoctorPayload = z.output<typeof editDoctorSubmissionSchema>;
+export const editDoctorSubmissionSchema = (existingSpecialties: string[]) =>
+  editDoctorFormSchema.transform((values) => {
+    const addedSpecialties = values.specialties
+      .filter((id) => !existingSpecialties.includes(id))
+      .map((id) => ({ specialtyId: id, action: "ADD" as const }));
+
+    const removedSpecialties = existingSpecialties
+      .filter((id) => !values.specialties.includes(id))
+      .map((id) => ({
+        specialtyId: id,
+        action: "REMOVE" as const,
+      }));
+    return {
+      doctor: {
+        name: values.name,
+        profilePhoto: values.profilePhoto || undefined,
+        contactNumber: values.contactNumber || undefined,
+        address: values.address || undefined,
+        registrationNumber: values.registrationNumber,
+        experience: values.experience,
+        gender: values.gender,
+        appointmentFee: values.appointmentFee,
+        qualification: values.qualification,
+        currentWorkingPlace: values.currentWorkingPlace,
+        designation: values.designation,
+      },
+      specialties: [...addedSpecialties, ...removedSpecialties],
+    };
+  });

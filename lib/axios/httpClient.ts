@@ -15,7 +15,10 @@ import axios, {
 /* Configuration & Instance Setup                                             */
 /* -------------------------------------------------------------------------- */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL =
+  typeof window === "undefined"
+    ? process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL
+    : process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const DEFAULT_TIMEOUT = 30_000;
 

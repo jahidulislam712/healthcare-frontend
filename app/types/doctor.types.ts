@@ -1,3 +1,5 @@
+import { UserRole } from "./auth.types";
+
 export enum Gender {
   MALE = "MALE",
   FEMALE = "FEMALE",
@@ -26,8 +28,12 @@ export interface IDoctor {
   averageRating: number;
   experience: number;
   createdAt: Date;
+  updatedAt: Date;
   user: {
     status: UserStatus;
+    role: string;
+    emailVerified: boolean;
+    needPasswordChange: boolean;
   };
   specialties: Array<{
     specialtyId: string;

@@ -7,21 +7,25 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getDoctors } from "@/services/doctor.services";
 import { CreateDoctorFormModal } from "./CreateDoctorFormModal";
 import { getSpecialties } from "@/services/specialty.services";
-import { ViewDoctorModal } from "./ViewDoctorModal";
+import { useState } from "react";
+import ViewDoctorModal from "./ViewDoctorModal";
+import { EditDoctorFormModal } from "./EditDoctorFormModal";
 
 function DoctorsTable() {
+  const [viewOpen, setViewOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedDoctor, SetSelectedDoctor] = useState<IDoctor | null>(null);
+
   const { data: doctorData, isLoading: loadingDoctors } = useQuery({
     queryKey: ["admin-doctors-data"],
     queryFn: getDoctors,
     staleTime: 60_000,
-    placeholderData: keepPreviousData,
   });
 
   const { data: specialtiesData, isLoading: loadingSpecialties } = useQuery({
     queryKey: ["admin-specialties"],
-    queryFn: getSpecialties,
+    queryFn: () => getSpecialties({ limit: 100 }),
     staleTime: 60_000,
-    placeholderData: keepPreviousData,
   });
 
   const doctors = doctorData?.data || [];
@@ -31,10 +35,12 @@ function DoctorsTable() {
   // console.log("Query state", queryClient.getQueryState(['admin-doctors-data']))
 
   const handleView = (doctor: IDoctor) => {
-    console.log("View", doctor);
+    SetSelectedDoctor(doctor);
+    setViewOpen(true);
   };
   const handleEdit = (doctor: IDoctor) => {
-    console.log("Edit", doctor);
+    SetSelectedDoctor(doctor);
+    setEditOpen(true);
   };
   const handleDelete = (doctor: IDoctor) => {
     console.log("Delete", doctor);
@@ -57,6 +63,18 @@ function DoctorsTable() {
           toolbarAction={<CreateDoctorFormModal specialties={specialties} />}
         />
       )}
+
+      <ViewDoctorModal
+        doctor={selectedDoctor}
+        open={viewOpen}
+        onOpenChange={setViewOpen}
+      />
+      <EditDoctorFormModal
+        doctor={selectedDoctor}
+        specialties={specialties}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
     </>
   );
 }
