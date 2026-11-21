@@ -94,6 +94,8 @@ export default function ProfilePhotoUpload({
     <div className="space-y-3">
       {value && (
         <Image
+                              height={30}
+                              width={30}
           src={value}
           alt="Doctor profile preview"
           className="size-24 rounded-full border object-cover"

@@ -25,4 +25,8 @@ export interface ApiErrorBody {
   message?: string;
   code?: string;
   errors?: unknown;
+  errorSources?: Array<{
+    path: string;
+    message: string;
+  }>;
 }

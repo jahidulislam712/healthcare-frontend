@@ -88,12 +88,6 @@ export default function ViewDoctorModal({
 }: DoctorProfileModalProps) {
   if (!doctor) return null;
 
-  const joinedDate = new Date(doctor.createdAt).toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
   const updatedDate = new Date(doctor.updatedAt).toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "short",

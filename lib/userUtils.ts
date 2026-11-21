@@ -1,7 +1,8 @@
 
-import type { UserInfo, UserRole } from "@/app/types/auth.types";
+import type { UserInfo } from "@/app/types/auth.types";
 import { cookies } from "next/headers";
 import { ApiClientError, httpClient } from "./axios/httpClient";
+import "server-only";
 
 export const getCurrentUser = async (): Promise<UserInfo | null> => {
   const cookieStore = await cookies();
@@ -27,19 +28,5 @@ export const getCurrentUser = async (): Promise<UserInfo | null> => {
 
     console.error("Cannot load your profile info: ", error);
     return null;
-  }
-};
-
-export const getDefaultDashboarRoute = (role: UserRole) => {
-  switch (role) {
-    case "ADMIN":
-    case "SUPER_ADMIN":
-      return "/admin/dashboard";
-    case "DOCTOR":
-      return "/doctor/dashboard";
-    case "PATIENT":
-      return "/dashboard";
-    default:
-      return "/";
   }
 };

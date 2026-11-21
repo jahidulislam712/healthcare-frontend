@@ -1,5 +1,5 @@
 import { useDebouncedCallback } from "@tanstack/react-pacer/debouncer";
-import { ComponentProps, useState, useEffect } from "react";
+import { ComponentProps, useState } from "react";
 import { Input } from "../ui/input";
 
 function DebouncedInput({
@@ -14,21 +14,21 @@ function DebouncedInput({
 } & Omit<ComponentProps<typeof Input>, "onChange">) {
   const [value, setValue] = useState(initialValue);
 
-  useEffect(() => {
-    setValue(initialValue);
-  }, [initialValue]);
-
-  const debouncedOnChange = useDebouncedCallback(onChange, { wait: debounce });
+  const debouncedOnChange = useDebouncedCallback(onChange, {
+    wait: debounce,
+  });
 
   return (
     <Input
       {...props}
       value={value}
       onChange={(e) => {
-        setValue(e.target.value);
-        debouncedOnChange(e.target.value);
+        const newValue = e.target.value;
+        setValue(newValue);
+        debouncedOnChange(newValue);
       }}
     />
   );
 }
+
 export default DebouncedInput;

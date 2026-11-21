@@ -10,7 +10,7 @@ import {
   loginZodSchema,
 } from "@/app/zod/auth.validation";
 import { ApiClientError, httpClient } from "@/lib/axios/httpClient";
-import { getDefaultDashboarRoute } from "@/lib/userUtils";
+import { getDefaultDashboarRoute } from "@/lib/dashboardRoutes";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 

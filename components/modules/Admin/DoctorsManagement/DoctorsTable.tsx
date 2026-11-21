@@ -3,7 +3,7 @@
 import { IDoctor } from "@/app/types/doctor.types";
 import DataTable from "@/components/shared/DataTable";
 import { columns } from "./DoctorsColumns";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getDoctors } from "@/services/doctor.services";
 import { CreateDoctorFormModal } from "./CreateDoctorFormModal";
 import { getSpecialties } from "@/services/specialty.services";

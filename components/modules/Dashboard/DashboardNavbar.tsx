@@ -1,7 +1,8 @@
-import { getCurrentUser, getDefaultDashboarRoute } from "@/lib/userUtils";
+import { getCurrentUser } from "@/lib/userUtils";
 import DashboardNavbarContent from "./DashboardNavbarContent";
 import { redirect } from "next/navigation";
 import { getNavMenusByRole } from "@/lib/navItems";
+import { getDefaultDashboarRoute } from "@/lib/dashboardRoutes";
 
 async function DashboardNavbar() {
   const user = await getCurrentUser();

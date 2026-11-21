@@ -31,9 +31,9 @@ if (!API_BASE_URL && typeof window === "undefined") {
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: DEFAULT_TIMEOUT,
+  withCredentials: true,
   headers: {
     Accept: "application/json",
-    "Content-Type": "application/json",
   },
 });
 
@@ -108,6 +108,18 @@ function normalizeError(error: unknown): ApiClientError {
 
   // A network error occurs if there is no response and the request was actually sent
   const isNetworkError = !axiosError.response && Boolean(axiosError.request);
+  const errorSources = Array.isArray(responseData?.errorSources)
+    ? responseData.errorSources.filter(
+        (source): source is { path: string; message: string } =>
+          typeof source?.path === "string" &&
+          typeof source?.message === "string",
+      )
+    : [];
+  const errorDetails = errorSources
+    .map((source) =>
+      source.path ? `${source.path}: ${source.message}` : source.message,
+    )
+    .join("; ");
 
   let message: string;
 
@@ -115,8 +127,12 @@ function normalizeError(error: unknown): ApiClientError {
     message = "The request was canceled.";
   } else if (isTimeout) {
     message = "The request timed out. Please try again.";
+  } else if (responseData?.message === "Validation Error" && errorDetails) {
+    message = `${responseData.message}: ${errorDetails}`;
   } else if (responseData?.message) {
     message = responseData.message;
+  } else if (errorDetails) {
+    message = errorDetails;
   } else if (isNetworkError) {
     message =
       "Unable to connect to the server. Please check your internet connection.";
@@ -134,7 +150,7 @@ function normalizeError(error: unknown): ApiClientError {
   return new ApiClientError(message, {
     status,
     code: responseData?.code ?? axiosError.code,
-    errors: responseData?.errors,
+    errors: errorSources.length ? errorSources : responseData?.errors,
     isNetworkError,
     isTimeout,
   });

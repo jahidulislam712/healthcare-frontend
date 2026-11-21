@@ -24,7 +24,7 @@ export default function SpecialtyManagementContent() {
   );
   const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(8);
+  const limit = 8
 
   const params = { searchTerm, page, limit };
   const { data, isFetching } = useQuery({

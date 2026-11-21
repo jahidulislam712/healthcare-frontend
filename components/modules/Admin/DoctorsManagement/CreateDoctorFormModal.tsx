@@ -9,7 +9,6 @@ import {
   ICreateDoctorPayload,
 } from "@/app/zod/doctor.validation";
 import FormInput from "@/components/shared/form/FormInput";
-import ProfilePhotoUpload from "@/components/shared/form/ProfilePhotoUpload";
 import { SpecialtiesMultiSelect } from "@/components/shared/form/SpecialtiesMultiSelect";
 import { Button } from "@/components/ui/button";
 import {

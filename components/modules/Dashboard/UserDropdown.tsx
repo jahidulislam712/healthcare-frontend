@@ -10,11 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Key, LogOut, User } from "lucide-react";
+import { getDefaultDashboarRoute } from "@/lib/dashboardRoutes";
+import { Key, LayoutDashboard, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 function UserDropdown({ user }: { user: UserInfo }) {
+  const dashboardRoute = user ? getDefaultDashboarRoute(user.role) : "/dashboard";
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -51,6 +53,12 @@ function UserDropdown({ user }: { user: UserInfo }) {
 
           <DropdownMenuSeparator />
 
+          <DropdownMenuItem>
+            <Link href={dashboardRoute} className="flex items-center">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Dashboard
+            </Link>
+          </DropdownMenuItem>
           <DropdownMenuItem>
             <Link href={"/my-profile"} className="flex items-center">
               <User className="mr-2 h-4 w-4" />
