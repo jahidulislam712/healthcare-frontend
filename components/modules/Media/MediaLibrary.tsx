@@ -88,7 +88,15 @@ export default function MediaLibrary() {
 
   // Update Metadata Mutation
   const updateMutation = useMutation({
-    mutationFn: async ({ id, altText, caption }: { id: string; altText: string; caption: string }) => {
+    mutationFn: async ({
+      id,
+      altText,
+      caption,
+    }: {
+      id: string;
+      altText: string;
+      caption: string;
+    }) => {
       return updateMediaAsset(id, { altText, caption });
     },
     onSuccess: (updated) => {
@@ -212,7 +220,7 @@ export default function MediaLibrary() {
           "cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-200",
           isDragOver
             ? "border-primary bg-primary/10 scale-[0.99]"
-            : "border-border/80 bg-muted/20 hover:border-primary/50 hover:bg-muted/40"
+            : "border-border/80 bg-muted/20 hover:border-primary/50 hover:bg-muted/40",
         )}
       >
         <div className="flex flex-col items-center justify-center gap-2">
@@ -220,7 +228,9 @@ export default function MediaLibrary() {
             <UploadCloud className="size-6" />
           </div>
           <div className="text-sm font-semibold text-foreground">
-            {uploadMutation.isPending ? "Uploading media to cloud storage..." : "Drag and drop images here, or click to browse"}
+            {uploadMutation.isPending
+              ? "Uploading media to cloud storage..."
+              : "Drag and drop images here, or click to browse"}
           </div>
           <p className="text-xs text-muted-foreground">
             Supports JPG, PNG, WebP, GIF, SVG. Max 10MB per file.
@@ -283,9 +293,12 @@ export default function MediaLibrary() {
           <div className="flex size-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground mb-3">
             <ImageIcon className="size-7" />
           </div>
-          <h3 className="text-base font-bold text-foreground">No media assets found</h3>
+          <h3 className="text-base font-bold text-foreground">
+            No media assets found
+          </h3>
           <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-4">
-            Upload images from your computer to use them on CMS pages, articles, and departments.
+            Upload images from your computer to use them on CMS pages, articles,
+            and departments.
           </p>
           <Button
             size="sm"
@@ -316,8 +329,8 @@ export default function MediaLibrary() {
                   className="relative aspect-square w-full cursor-pointer overflow-hidden bg-muted/40"
                 >
                   <Image
-                              height={30}
-                              width={30}
+                    height={190}
+                    width={190}
                     src={asset.secureUrl || asset.url}
                     alt={asset.altText || asset.fileName}
                     className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -368,7 +381,10 @@ export default function MediaLibrary() {
                   </div>
 
                   {usageCount > 0 && (
-                    <Badge variant="outline" className="text-[9px] px-1 py-0 border-primary/30 text-primary">
+                    <Badge
+                      variant="outline"
+                      className="text-[9px] px-1 py-0 border-primary/30 text-primary"
+                    >
                       Used in {usageCount} {usageCount === 1 ? "page" : "pages"}
                     </Badge>
                   )}
@@ -394,12 +410,15 @@ export default function MediaLibrary() {
             </thead>
             <tbody className="divide-y divide-border/50">
               {assets.map((asset) => (
-                <tr key={asset.id} className="hover:bg-muted/30 transition-colors">
+                <tr
+                  key={asset.id}
+                  className="hover:bg-muted/30 transition-colors"
+                >
                   <td className="p-3.5 pl-4">
                     <div className="size-10 rounded-lg overflow-hidden border border-border bg-muted/40">
                       <Image
-                              height={30}
-                              width={30}
+                        height={30}
+                        width={30}
                         src={asset.secureUrl || asset.url}
                         alt={asset.altText || asset.fileName}
                         className="size-full object-cover cursor-pointer"
@@ -422,7 +441,9 @@ export default function MediaLibrary() {
                     )}
                   </td>
                   <td className="p-3.5 text-muted-foreground">
-                    {asset.width && asset.height ? `${asset.width} × ${asset.height}` : "—"}
+                    {asset.width && asset.height
+                      ? `${asset.width} × ${asset.height}`
+                      : "—"}
                   </td>
                   <td className="p-3.5 text-muted-foreground">
                     {formatFileSize(asset.size)}
@@ -440,7 +461,9 @@ export default function MediaLibrary() {
                       <Button
                         size="icon-xs"
                         variant="ghost"
-                        onClick={() => handleCopyLink(asset.secureUrl || asset.url, asset.id)}
+                        onClick={() =>
+                          handleCopyLink(asset.secureUrl || asset.url, asset.id)
+                        }
                         title="Copy link"
                       >
                         {copiedId === asset.id ? (
@@ -497,9 +520,12 @@ export default function MediaLibrary() {
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-2xl flex flex-col p-6">
           <DialogHeader className="pb-3 border-b border-border/60">
-            <DialogTitle className="text-lg font-bold">Asset Details</DialogTitle>
+            <DialogTitle className="text-lg font-bold">
+              Asset Details
+            </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Inspect file specifications, update accessibility alt text, or delete asset.
+              Inspect file specifications, update accessibility alt text, or
+              delete asset.
             </DialogDescription>
           </DialogHeader>
 
@@ -508,8 +534,8 @@ export default function MediaLibrary() {
               {/* Preview image */}
               <div className="relative max-h-72 w-full overflow-hidden rounded-xl border border-border/80 bg-muted/40 flex items-center justify-center p-2">
                 <Image
-                              height={30}
-                              width={30}
+                  height={400}
+                  width={625}
                   src={selectedAsset.secureUrl || selectedAsset.url}
                   alt={selectedAsset.altText || selectedAsset.fileName}
                   className="max-h-68 max-w-full rounded-lg object-contain shadow-xs"
@@ -518,7 +544,9 @@ export default function MediaLibrary() {
 
               {/* URL with quick copy */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">CDN Link</label>
+                <label className="text-xs font-semibold text-foreground">
+                  CDN Link
+                </label>
                 <div className="flex items-center gap-2">
                   <Input
                     readOnly
@@ -529,7 +557,12 @@ export default function MediaLibrary() {
                     size="sm"
                     variant="outline"
                     className="shrink-0 gap-1.5 text-xs"
-                    onClick={() => handleCopyLink(selectedAsset.secureUrl || selectedAsset.url, selectedAsset.id)}
+                    onClick={() =>
+                      handleCopyLink(
+                        selectedAsset.secureUrl || selectedAsset.url,
+                        selectedAsset.id,
+                      )
+                    }
                   >
                     {copiedId === selectedAsset.id ? (
                       <Check className="size-3.5 text-emerald-500" />
@@ -544,21 +577,35 @@ export default function MediaLibrary() {
               {/* Metadata Attributes Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-xl bg-muted/30 p-3.5 text-xs border border-border/50">
                 <div>
-                  <span className="text-muted-foreground block text-[10px]">Format</span>
-                  <span className="font-bold text-foreground">{selectedAsset.format?.toUpperCase() || "Unknown"}</span>
-                </div>
-                <div>
-                  <span className="text-muted-foreground block text-[10px]">Dimensions</span>
+                  <span className="text-muted-foreground block text-[10px]">
+                    Format
+                  </span>
                   <span className="font-bold text-foreground">
-                    {selectedAsset.width && selectedAsset.height ? `${selectedAsset.width} × ${selectedAsset.height}` : "—"}
+                    {selectedAsset.format?.toUpperCase() || "Unknown"}
                   </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-[10px]">File Size</span>
-                  <span className="font-bold text-foreground">{formatFileSize(selectedAsset.size)}</span>
+                  <span className="text-muted-foreground block text-[10px]">
+                    Dimensions
+                  </span>
+                  <span className="font-bold text-foreground">
+                    {selectedAsset.width && selectedAsset.height
+                      ? `${selectedAsset.width} × ${selectedAsset.height}`
+                      : "—"}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground block text-[10px]">Uploaded On</span>
+                  <span className="text-muted-foreground block text-[10px]">
+                    File Size
+                  </span>
+                  <span className="font-bold text-foreground">
+                    {formatFileSize(selectedAsset.size)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground block text-[10px]">
+                    Uploaded On
+                  </span>
                   <span className="font-bold text-foreground">
                     {format(new Date(selectedAsset.createdAt), "MMM d, yyyy")}
                   </span>
@@ -601,9 +648,23 @@ export default function MediaLibrary() {
               className="gap-1.5 text-xs"
               disabled={deleteMutation.isPending || !selectedAsset}
               onClick={() => {
-                if (selectedAsset && confirm(`Are you sure you want to delete "${selectedAsset.fileName}"?`)) {
-                  deleteMutation.mutate(selectedAsset.id);
-                }
+                if (!selectedAsset) return;
+                const asset = selectedAsset;
+
+                toast.warning(
+                  `Are you sure you want to delete?`,
+                  {
+                    action: {
+                      label: "Delete",
+                      onClick: () => deleteMutation.mutate(asset.id),
+                    },
+                    cancel: {
+                      label: "Cancel",
+                      onClick: () => toast.dismiss(),
+                    },
+                    duration: 5000,
+                  },
+                );
               }}
             >
               <Trash2 className="size-3.5" />
@@ -611,7 +672,13 @@ export default function MediaLibrary() {
             </Button>
 
             <div className="flex items-center gap-2">
-              <DialogClose render={<Button variant="outline" size="sm">Close</Button>} />
+              <DialogClose
+                render={
+                  <Button variant="outline" size="sm">
+                    Close
+                  </Button>
+                }
+              />
               <Button
                 size="sm"
                 disabled={updateMutation.isPending || !selectedAsset}
