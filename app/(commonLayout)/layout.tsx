@@ -1,13 +1,19 @@
 import { ReactNode, Suspense } from "react";
 import LandingNavbar from "@/components/modules/Landing/LandingNavbar";
 import LandingFooter from "@/components/modules/Landing/LandingFooter";
+import RagChatbot from "@/components/modules/Rag/RagChatbot";
 import { getCurrentUser } from "@/lib/userUtils";
 import { getPages } from "@/services/page.services";
 import { IPage } from "@/app/types/page.types";
 
 async function PublicNavbarWrapper() {
   const currentUser = await getCurrentUser();
-  return <LandingNavbar currentUser={currentUser} />;
+  return (
+    <>
+      <LandingNavbar currentUser={currentUser} />
+      {currentUser && <RagChatbot />}
+    </>
+  );
 }
 
 async function PublicFooterWrapper() {

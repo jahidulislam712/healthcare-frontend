@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import DashboardNavbar from "@/components/modules/Dashboard/DashboardNavbar";
 import DashboardSidebar from "@/components/modules/Dashboard/DashboardSidebar";
 import { NavbarSkeleton, SidebarSkeleton } from "@/components/modules/Dashboard/SidebarSkeleton";
+import RagChatbot from "@/components/modules/Rag/RagChatbot";
 
 function RootDashboardLayout({
   children,
@@ -25,6 +26,7 @@ function RootDashboardLayout({
           <div>{children}</div>
         </main>
       </div>
+      <RagChatbot />
     </div>
   );
 }
