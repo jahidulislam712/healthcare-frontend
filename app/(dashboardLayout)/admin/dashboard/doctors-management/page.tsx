@@ -1,12 +1,19 @@
 import DoctorsTable from "@/components/modules/Admin/DoctorsManagement/DoctorsTable";
 import { getDoctors } from "@/services/doctor.services";
 import { getSpecialties } from "@/services/specialty.services";
+import { DoctorQueryParams } from "@/app/types/doctor.types";
 import {
   dehydrate,
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
 import { Suspense } from "react";
+
+const initialDoctorParams: DoctorQueryParams = {
+  searchTerm: "",
+  page: 1,
+  limit: 10,
+};
 
 export default function DoctorsManagementPage() {
   return (
@@ -21,8 +28,8 @@ async function DoctorsWithData() {
 
   await Promise.all([
     queryClient.query({
-      queryKey: ["admin-doctors-data"],
-      queryFn: getDoctors,
+      queryKey: ["admin-doctors-data", initialDoctorParams],
+      queryFn: () => getDoctors(initialDoctorParams),
       staleTime: 60_000,
     }),
     

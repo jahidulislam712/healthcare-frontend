@@ -1,14 +1,16 @@
 "use server";
 
-import { IDoctor } from "@/app/types/doctor.types";
+import { DoctorQueryParams, IDoctor } from "@/app/types/doctor.types";
 import {
   ICreateDoctorPayload,
   IEditDoctorPayload,
 } from "@/app/zod/doctor.validation";
 import { serverApiClient } from "@/lib/axios/serverApiClient";
 
-export const getDoctors = async () => {
-  const response = await serverApiClient.get<IDoctor[]>("/doctors");
+export const getDoctors = async (params: DoctorQueryParams = {}) => {
+  const response = await serverApiClient.get<IDoctor[]>("/doctors", {
+    params,
+  });
 
   if (!response.success || response.data === undefined) {
     throw new Error(response.message || "Unable to fetch doctors.");

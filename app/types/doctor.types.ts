@@ -45,3 +45,11 @@ export interface IDoctor {
     };
   }>;
 }
+
+export interface DoctorQueryParams extends Record<string, unknown> {
+  searchTerm?: string;
+  page?: number;
+  limit?: number;
+  gender?: Gender;
+  "specialties.specialty.title"?: string;
+}

@@ -14,4 +14,6 @@ export interface DataTableProps<TData extends RowData> {
   emptyMessage?: string;
   isLoading?: boolean;
   toolbarAction?: React.ReactElement;
+  showSearch?: boolean;
+  showPagination?: boolean;
 }
