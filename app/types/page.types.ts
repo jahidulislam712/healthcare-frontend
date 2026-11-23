@@ -1,6 +1,8 @@
 import { PaginationMeta } from "./api.types";
 import { IMediaAsset } from "./media.types";
-import type { JSONContent } from "@tiptap/react";
+import type { PartialBlock } from "@blocknote/core";
+
+export type PageContentJson = PartialBlock[];
 
 export type PageStatus =
   | "DRAFT"
@@ -16,6 +18,27 @@ export type PageLayout =
   | "LEGAL"
   | "HELP_CENTER"
   | "CUSTOM";
+
+export interface PageFormValues {
+  title: string;
+  slug: string;
+  subtitle: string;
+  excerpt: string;
+  content: string;
+  layout: PageLayout;
+  status: PageStatus;
+  parentId: string;
+  orderIndex: string;
+  thumbnailId: string | null;
+  thumbnailMedia: IMediaAsset | null;
+  ogImageId: string | null;
+  ogImageMedia: IMediaAsset | null;
+  metaTitle: string;
+  metaDescription: string;
+  canonicalUrl: string;
+  scheduledAt: string;
+  noIndex: boolean;
+}
 
 export interface IPage {
   id: string;
@@ -65,7 +88,7 @@ export interface CreatePagePayload {
   subtitle?: string;
   excerpt?: string;
   content: string;
-  contentJson?: JSONContent | null;
+  contentJson?: PageContentJson | null;
   layout?: PageLayout;
   status?: PageStatus;
   parentId?: string | null;
@@ -85,7 +108,7 @@ export interface UpdatePagePayload {
   subtitle?: string | null;
   excerpt?: string | null;
   content?: string;
-  contentJson?: JSONContent | null;
+  contentJson?: PageContentJson | null;
   layout?: PageLayout;
   status?: PageStatus;
   parentId?: string | null;

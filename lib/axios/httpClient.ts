@@ -140,12 +140,12 @@ function normalizeError(error: unknown): ApiClientError {
     message = axiosError.message || "The request failed.";
   }
 
-  if (process.env.NODE_ENV === "development") {
-    console.error(
-      "Backend response body:",
-      JSON.stringify(axiosError.response?.data, null, 2),
-    );
-  }
+  // if (process.env.NODE_ENV === "development") {
+  //   console.error(
+  //     "Backend response body:",
+  //     JSON.stringify(axiosError.response?.data, null, 2),
+  //   );
+  // }
 
   return new ApiClientError(message, {
     status,

@@ -1,236 +1,304 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Bold,
-  Code,
-  Heading1,
-  Heading2,
-  Italic,
-  Link2,
-  List,
-  ListOrdered,
-  Quote,
-  Redo2,
-  Strikethrough,
-  Undo2,
-} from "lucide-react";
-import { EditorContent, useEditor } from "@tiptap/react";
-import type { JSONContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import { useState } from "react";
-import type { ReactNode } from "react";
+import "@blocknote/core/fonts/inter.css";
+import "@blocknote/shadcn/style.css";
 
-function ToolbarButton({
-  label,
-  active = false,
-  disabled = false,
-  onClick,
-  children,
-}: {
-  label: string;
-  active?: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
+import type { PartialBlock } from "@blocknote/core";
+import { useCreateBlockNote } from "@blocknote/react";
+import { BlockNoteView } from "@blocknote/shadcn";
+import { useEffect, useRef, useState } from "react";
+
+interface RichTextEditorProps {
+  content: unknown;
+  onChange: (json: PartialBlock[], html: string) => void;
+}
+
+interface LegacyMark {
+  type: string;
+  attrs?: Record<string, unknown>;
+}
+
+interface LegacyNode {
+  type?: string;
+  text?: string;
+  attrs?: Record<string, unknown>;
+  content?: LegacyNode[];
+  marks?: LegacyMark[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isLegacyNode(value: unknown): value is LegacyNode {
+  if (!isRecord(value)) return false;
+
   return (
-    <Button
-      type="button"
-      size="icon-sm"
-      variant={active ? "secondary" : "ghost"}
-      aria-label={label}
-      aria-pressed={active}
-      title={label}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      {children}
-    </Button>
+    (value.type === undefined || typeof value.type === "string") &&
+    (value.text === undefined || typeof value.text === "string") &&
+    (value.attrs === undefined || isRecord(value.attrs)) &&
+    (value.content === undefined ||
+      (Array.isArray(value.content) && value.content.every(isLegacyNode))) &&
+    (value.marks === undefined ||
+      (Array.isArray(value.marks) &&
+        value.marks.every(
+          (mark) =>
+            isRecord(mark) &&
+            typeof mark.type === "string" &&
+            (mark.attrs === undefined || isRecord(mark.attrs)),
+        )))
+  );
+}
+
+function isLegacyDocument(value: unknown): value is LegacyNode {
+  return (
+    isRecord(value) &&
+    value.type === "doc" &&
+    Array.isArray(value.content) &&
+    value.content.every(isLegacyNode)
+  );
+}
+
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (character) => {
+    switch (character) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      default:
+        return "&#39;";
+    }
+  });
+}
+
+function safeHref(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+
+  try {
+    const url = new URL(value);
+    return ["http:", "https:", "mailto:", "tel:"].includes(url.protocol)
+      ? value
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function safeResourceUrl(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+
+  try {
+    const url = new URL(value);
+    return ["http:", "https:"].includes(url.protocol) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function renderLegacyNode(node: LegacyNode): string {
+  if (node.type === "text") {
+    let html = escapeHtml(node.text ?? "");
+
+    for (const mark of node.marks ?? []) {
+      switch (mark.type) {
+        case "bold":
+          html = `<strong>${html}</strong>`;
+          break;
+        case "italic":
+          html = `<em>${html}</em>`;
+          break;
+        case "strike":
+          html = `<s>${html}</s>`;
+          break;
+        case "code":
+          html = `<code>${html}</code>`;
+          break;
+        case "underline":
+          html = `<u>${html}</u>`;
+          break;
+        case "subscript":
+          html = `<sub>${html}</sub>`;
+          break;
+        case "superscript":
+          html = `<sup>${html}</sup>`;
+          break;
+        case "link": {
+          const href = safeHref(mark.attrs?.href);
+          if (href) html = `<a href="${escapeHtml(href)}">${html}</a>`;
+          break;
+        }
+      }
+    }
+
+    return html;
+  }
+
+  const children = (node.content ?? []).map(renderLegacyNode).join("");
+
+  switch (node.type) {
+    case "doc":
+      return children;
+    case "paragraph":
+      return `<p>${children}</p>`;
+    case "heading": {
+      const level =
+        typeof node.attrs?.level === "number" &&
+        node.attrs.level >= 1 &&
+        node.attrs.level <= 3
+          ? node.attrs.level
+          : 1;
+      return `<h${level}>${children}</h${level}>`;
+    }
+    case "bulletList":
+      return `<ul>${children}</ul>`;
+    case "orderedList": {
+      const start = node.attrs?.start;
+      const startAttribute =
+        typeof start === "number" && start > 1 ? ` start="${start}"` : "";
+      return `<ol${startAttribute}>${children}</ol>`;
+    }
+    case "listItem":
+      return `<li>${children}</li>`;
+    case "blockquote":
+      return `<blockquote>${children}</blockquote>`;
+    case "codeBlock":
+      return `<pre><code>${children}</code></pre>`;
+    case "horizontalRule":
+      return "<hr>";
+    case "hardBreak":
+      return "<br>";
+    case "image": {
+      const src = safeResourceUrl(node.attrs?.src);
+      if (!src) return "";
+      const alt =
+        typeof node.attrs?.alt === "string" ? node.attrs.alt : "";
+      return `<img src="${escapeHtml(src)}" alt="${escapeHtml(alt)}">`;
+    }
+    default:
+      return children;
+  }
+}
+
+function isBlockNoteDocument(value: unknown): value is PartialBlock[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (block) =>
+        isRecord(block) && typeof block.type === "string",
+    )
   );
 }
 
 export default function RichTextEditor({
   content,
   onChange,
-}: {
-  content: JSONContent | string;
-  onChange: (html: string, json: JSONContent) => void;
-}) {
-  const [linkOpen, setLinkOpen] = useState(false);
-  const [linkUrl, setLinkUrl] = useState("");
-  const editor = useEditor({
-    immediatelyRender: false,
-    extensions: [StarterKit.configure({ link: { openOnClick: false } })],
-    content,
-    editorProps: {
-      attributes: {
-        "aria-label": "Page content",
-      },
-    },
-    onUpdate: ({ editor: currentEditor }) => {
-      onChange(currentEditor.getHTML(), currentEditor.getJSON());
-    },
+}: RichTextEditorProps) {
+  const [initialContent] = useState(() => content);
+
+  const initialBlocks = isBlockNoteDocument(initialContent)
+    ? initialContent
+    : undefined;
+  const lastLoadedContent = useRef(
+    initialBlocks || initialContent == null ? initialContent : undefined,
+  );
+
+  const editor = useCreateBlockNote({
+    initialContent: initialBlocks,
   });
 
-  const toggleLinkEditor = () => {
-    if (!editor) return;
-    setLinkUrl(editor.getAttributes("link").href ?? "");
-    setLinkOpen((open) => !open);
-  };
+  const [contentReady, setContentReady] = useState(
+    initialBlocks !== undefined || initialContent == null,
+  );
 
-  const applyLink = () => {
-    if (!editor) return;
-    const url = linkUrl.trim();
-    if (url) {
-      editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
-    } else {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
-    }
-    setLinkOpen(false);
+  const [loadError, setLoadError] = useState(false);
+
+  // Load BlockNote JSON, legacy TipTap JSON, or HTML when external content changes.
+  useEffect(() => {
+    if (content === lastLoadedContent.current) return;
+
+    let cancelled = false;
+
+    const loadContent = async () => {
+      try {
+        setContentReady(false);
+        setLoadError(false);
+
+        let blocks: PartialBlock[];
+
+        if (content == null) {
+          blocks = [];
+        } else if (isBlockNoteDocument(content)) {
+          blocks = content;
+        } else if (typeof content === "string" && content?.trim()) {
+          blocks = await editor.tryParseHTMLToBlocks(content);
+        } else if (typeof content === "string") {
+          blocks = [];
+        } else if (isLegacyDocument(content)) {
+          const html = renderLegacyNode(content);
+          blocks = await editor.tryParseHTMLToBlocks(html);
+        } else {
+          throw new Error("Unsupported page content format.");
+        }
+
+        if (cancelled) return;
+
+        editor.replaceBlocks(editor.document, blocks);
+
+        lastLoadedContent.current = blocks;
+        setContentReady(true);
+
+        // Synchronize the converted content with the parent.
+        onChange(blocks, editor.blocksToHTMLLossy(blocks));
+      } catch (error) {
+        if (cancelled) return;
+
+        console.error("Page content import failed:", error);
+        setLoadError(true);
+      }
+    };
+
+    void loadContent();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [content, editor, onChange]);
+
+  // Handle user edits.
+  const handleChange = () => {
+    const blocks = editor.document;
+
+    lastLoadedContent.current = blocks;
+    onChange(blocks, editor.blocksToHTMLLossy(blocks));
   };
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-background">
-      <div
-        className="flex flex-wrap items-center gap-1 border-b bg-muted/40 p-2"
-        role="toolbar"
-        aria-label="Page content formatting"
-      >
-        <ToolbarButton
-          label="Bold"
-          active={editor?.isActive("bold")}
-          disabled={!editor}
-          onClick={() => editor?.chain().focus().toggleBold().run()}
-        >
-          <Bold />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Italic"
-          active={editor?.isActive("italic")}
-          disabled={!editor}
-          onClick={() => editor?.chain().focus().toggleItalic().run()}
-        >
-          <Italic />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Strikethrough"
-          active={editor?.isActive("strike")}
-          disabled={!editor}
-          onClick={() => editor?.chain().focus().toggleStrike().run()}
-        >
-          <Strikethrough />
-        </ToolbarButton>
-        <span className="mx-1 h-6 w-px bg-border" />
-        <ToolbarButton
-          label="Heading 1"
-          active={editor?.isActive("heading", { level: 1 })}
-          disabled={!editor}
-          onClick={() =>
-            editor?.chain().focus().toggleHeading({ level: 1 }).run()
-          }
-        >
-          <Heading1 />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Heading 2"
-          active={editor?.isActive("heading", { level: 2 })}
-          disabled={!editor}
-          onClick={() =>
-            editor?.chain().focus().toggleHeading({ level: 2 }).run()
-          }
-        >
-          <Heading2 />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Bullet list"
-          active={editor?.isActive("bulletList")}
-          disabled={!editor}
-          onClick={() => editor?.chain().focus().toggleBulletList().run()}
-        >
-          <List />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Numbered list"
-          active={editor?.isActive("orderedList")}
-          disabled={!editor}
-          onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-        >
-          <ListOrdered />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Block quote"
-          active={editor?.isActive("blockquote")}
-          disabled={!editor}
-          onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-        >
-          <Quote />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Inline code"
-          active={editor?.isActive("code")}
-          disabled={!editor}
-          onClick={() => editor?.chain().focus().toggleCode().run()}
-        >
-          <Code />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Link"
-          active={editor?.isActive("link")}
-          disabled={!editor}
-          onClick={toggleLinkEditor}
-        >
-          <Link2 />
-        </ToolbarButton>
-        <span className="mx-1 h-6 w-px bg-border" />
-        <ToolbarButton
-          label="Undo"
-          disabled={!editor || !editor.can().undo()}
-          onClick={() => editor?.chain().focus().undo().run()}
-        >
-          <Undo2 />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Redo"
-          disabled={!editor || !editor.can().redo()}
-          onClick={() => editor?.chain().focus().redo().run()}
-        >
-          <Redo2 />
-        </ToolbarButton>
-      </div>
-
-      {linkOpen && (
-        <div className="flex gap-2 border-b p-3">
-          <input
-            autoFocus
-            type="url"
-            className="h-9 min-w-0 flex-1 rounded-md border bg-background px-3 text-sm"
-            placeholder="https://example.com"
-            aria-label="Link URL"
-            value={linkUrl}
-            onChange={(event) => setLinkUrl(event.target.value)}
-          />
-          <Button type="button" size="sm" onClick={applyLink}>
-            Apply
-          </Button>
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => setLinkOpen(false)}
-          >
-            Cancel
-          </Button>
-        </div>
+    <div
+      className="rounded-lg border bg-background"
+      aria-busy={!contentReady && !loadError}
+    >
+      {loadError ? (
+        <p className="p-4 text-sm text-destructive" role="alert">
+          Could not load existing page content. Reload the page before editing.
+        </p>
+      ) : contentReady ? (
+        <BlockNoteView
+          editor={editor}
+          onChange={handleChange}
+          className="min-h-105 [&_.bn-editor]:min-h-105"
+        />
+      ) : (
+        <p className="p-4 text-sm text-muted-foreground" role="status">
+          Loading page content...
+        </p>
       )}
-
-      <EditorContent
-        editor={editor}
-        className="min-h-[420px] [&_.tiptap]:min-h-[420px] [&_.tiptap]:p-5 [&_.tiptap]:outline-none [&_.tiptap_blockquote]:my-4 [&_.tiptap_blockquote]:border-l-2 [&_.tiptap_blockquote]:pl-4 [&_.tiptap_h1]:my-5 [&_.tiptap_h1]:text-3xl [&_.tiptap_h1]:font-bold [&_.tiptap_h2]:my-4 [&_.tiptap_h2]:text-2xl [&_.tiptap_h2]:font-semibold [&_.tiptap_ol]:my-3 [&_.tiptap_ol]:list-decimal [&_.tiptap_ol]:pl-6 [&_.tiptap_p]:my-3 [&_.tiptap_ul]:my-3 [&_.tiptap_ul]:list-disc [&_.tiptap_ul]:pl-6"
-      />
-      <div className="border-t px-4 py-2 text-xs text-muted-foreground">
-        Use the toolbar to format page content.
-      </div>
     </div>
   );
 }

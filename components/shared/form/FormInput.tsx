@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 type FormInputProps = {
-  label: string;
+  label?: string;
   name: string;
   value: string | number | string[];
   placeholder?: string;

@@ -63,7 +63,7 @@ async function LandingMainContent() {
       <LandingSpecialties specialties={specialties} />
 
       {/* Top Verified Doctors */}
-      <LandingDoctors doctors={doctors} />
+      <LandingDoctors doctors={doctors} /> 
 
       {/* Core Services */}
       <LandingServices />

@@ -30,6 +30,7 @@ export default function PageManagementContent() {
   const [selectedPage, setSelectedPage] = useState<IPage | null>(null);
   const queryClient = useQueryClient();
   const params = { searchTerm, page: pageNumber, limit: 10 };
+  
   const { data, isFetching, isError, error } = useQuery({
     queryKey: ["admin-pages", params],
     queryFn: () => getPages(params),
@@ -91,7 +92,9 @@ export default function PageManagementContent() {
             Create and manage website pages.
           </p>
         </div>
-        <Link className={buttonVariants()} href="/pages/create">Add new page</Link>
+        <Link className={buttonVariants()} href="/pages/create">
+          Add new page
+        </Link>
       </header>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -112,12 +115,18 @@ export default function PageManagementContent() {
       </div>
 
       {isError ? (
-        <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive" role="alert">
+        <div
+          className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"
+          role="alert"
+        >
           {error.message || "Unable to load pages."}
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto rounded-md border" aria-busy={isFetching}>
+          <div
+            className="overflow-x-auto rounded-md border"
+            aria-busy={isFetching}
+          >
             <table className="w-full min-w-180 text-left text-sm">
               <thead className="border-b bg-muted/50 text-muted-foreground">
                 <tr>
@@ -131,7 +140,10 @@ export default function PageManagementContent() {
               <tbody className="divide-y">
                 {isFetching && !data ? (
                   <tr>
-                    <td className="px-4 py-10 text-center text-muted-foreground" colSpan={5}>
+                    <td
+                      className="px-4 py-10 text-center text-muted-foreground"
+                      colSpan={5}
+                    >
                       Loading pages...
                     </td>
                   </tr>
@@ -206,7 +218,10 @@ export default function PageManagementContent() {
                   ))
                 ) : (
                   <tr>
-                    <td className="px-4 py-10 text-center text-muted-foreground" colSpan={5}>
+                    <td
+                      className="px-4 py-10 text-center text-muted-foreground"
+                      colSpan={5}
+                    >
                       No pages found.
                     </td>
                   </tr>
@@ -246,6 +261,7 @@ export default function PageManagementContent() {
         onOpenChange={(open) => {
           if (!open) setSelectedPage(null);
         }}
+        disablePointerDismissal
       >
         <DialogContent className="max-h-[92vh] overflow-y-auto sm:max-w-7xl">
           <DialogHeader>
